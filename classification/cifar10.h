@@ -79,13 +79,20 @@ static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha
 	}
 	return imgs;
 }
-static inline char* __DownloadCifar10(char* tmp_path, char* url_img, char* name_img) {
+static inline char* __DownloadCifar10(char* tmp_path, char* url_img, char* name_img,int file_size) {
 #if defined(_WIN32) || defined(_WIN64)
 	int len = GetTempPathA(MAX_PATH, tmp_path);
 	assert(len != 0);
 	char img_file[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(img_file, tmp_path), name_img);
-	if (PathFileExistsA(img_file) == FALSE) {
+	int size = 0;
+	FILE* fp = fopen(img_file,"rb");
+	if (fp) {
+		fseek(fp, 0, SEEK_END);
+		size = ftell(fp);
+		fclose(fp);
+	}
+	if (PathFileExistsA(img_file) == FALSE || size!=file_size) {
 		HRESULT r = URLDownloadToFileA(NULL, url_img, img_file, 0, 0);
 		if (r != S_OK) {
 			fprintf(stderr, "CIFAR10 image Download failure!\n");
@@ -96,7 +103,14 @@ static inline char* __DownloadCifar10(char* tmp_path, char* url_img, char* name_
 	strcpy(tmp_path, "/tmp/");
 	char img_file[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(img_file, tmp_path), name_img);
-	if (access(img_file, F_OK) != 0) {
+	int size = 0;
+	FILE* fp = fopen(img_file, "rb");
+	if (fp) {
+		fseek(fp, 0, SEEK_END);
+		size = ftell(fp);
+		fclose(fp);
+	}
+	if (access(img_file, F_OK) != 0 || size!=file_size) {
 		char cmd[MAX_PATH + 1] = { 0 };
 		sprintf(cmd, "wget -O %s \"%s\" >>/tmp/mnist.log 2>&1", img_file, url_img);
 		if (system(cmd) != 0) {
@@ -112,11 +126,11 @@ static inline IMDSImage GetCifar10TrainData(int padding, float alpha) {
 	char name_img[MAX_PATH + 1] = { 0 };
 	IMDSImage train;
 	char* url[5] = {
-		"https://www.dropbox.com/s/1u0hpkbbddn3hc1/data_batch_1.bin?dl=1"
-		,"https://www.dropbox.com/s/mxk1zozw42cqk2a/data_batch_2.bin?dl=1"
-		,"https://www.dropbox.com/s/cxg81q891j78wa9/data_batch_3.bin?dl=1"
-		,"https://www.dropbox.com/s/tcnds6l7rba5tn7/data_batch_4.bin?dl=1"
-		,"https://www.dropbox.com/s/u9500s411uocjgg/data_batch_5.bin?dl=1"
+		"https://www.dropbox.com/s/1u0hpkbbddn3hc1/openimds_cifar10_train_1.bin?dl=1"
+		,"https://www.dropbox.com/s/mxk1zozw42cqk2a/openimds_cifar10_train_2.bin?dl=1"
+		,"https://www.dropbox.com/s/cxg81q891j78wa9/openimds_cifar10_train_3.bin?dl=1"
+		,"https://www.dropbox.com/s/tcnds6l7rba5tn7/openimds_cifar10_train_4.bin?dl=1"
+		,"https://www.dropbox.com/s/u9500s411uocjgg/openimds_cifar10_train_5.bin?dl=1"
 	};
 	train.c = 3;
 	train.w = 32 + padding * 2;
@@ -125,8 +139,8 @@ static inline IMDSImage GetCifar10TrainData(int padding, float alpha) {
 	train.image = (float**)calloc(train.n, sizeof(float*));
 	train.label = (int*)calloc(train.n, sizeof(int));
 	for (int i = 1; i <= 5; i++) {
-		sprintf(name_img, "data_batch_%d.bin",i);
-		__DownloadCifar10(tmp_path, url[i-1], name_img);
+		sprintf(name_img, "openimds_cifar10_train_%d.bin",i);
+		__DownloadCifar10(tmp_path, url[i-1], name_img,30730000);
 		char path_img[MAX_PATH + 1] = { 0 };
 		strcat(strcpy(path_img, tmp_path), name_img);
 		IMDSImage temp= __ReadCIFAR10(path_img, padding, alpha);
@@ -139,9 +153,9 @@ static inline IMDSImage GetCifar10TrainData(int padding, float alpha) {
 }
 static inline IMDSImage GetCifar10ValidData(int padding, float alpha) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
-	char* name_img = "test_batch.bin";
-	char* url = "https://www.dropbox.com/s/uifxmb6hi0rmvr3/test_batch.bin?dl=1";
-	__DownloadCifar10(tmp_path, url,name_img);
+	char* name_img = "openimds_cifar10_test.bin";
+	char* url = "https://www.dropbox.com/s/uifxmb6hi0rmvr3/openimds_cifar10_test.bin?dl=1";
+	__DownloadCifar10(tmp_path, url,name_img,30730000);
 	char path_img[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(path_img, tmp_path), name_img);
 	return __ReadCIFAR10(path_img, padding, alpha);	
