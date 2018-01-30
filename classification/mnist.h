@@ -31,8 +31,9 @@
 #define _IMDSImage
 typedef struct IMDSImage IMDSImage;
 struct IMDSImage {
-	int width;
-	int height;
+	int w;
+	int h;
+	int c;
 	int n;
 	float** image;
 	int* label;
@@ -69,8 +70,9 @@ static inline IMDSImage __ReadMNIST(char* image_file, char* label_file, int padd
 	assert(magic_number == 2049);
 	fread(&num_of_items, sizeof(int), 1, fp_label); __EndianChange(&num_of_items, sizeof(int));
 	assert(num_of_items == num_of_images);
-	imgs.width = cols;
-	imgs.height = rows;
+	imgs.w = cols;
+	imgs.h = rows;
+	imgs.c = 1;
 	imgs.n = num_of_images;
 	imgs.image = (float**)calloc(num_of_images, sizeof(float*));
 	imgs.label = (int*)calloc(num_of_images, sizeof(int));
