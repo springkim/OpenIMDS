@@ -27,3 +27,17 @@ IMDSImage GetMnistValidData(int padding,float alpha);
 IMDSImage train= GetMnistTrainData(0, 1 / 255.0F);
 IMDSImage valid= GetMnistValidData(0, 1 / 255.0F);
 ```
+#### Cifar-10
+<img src="https://i.imgur.com/X7Tv9dQ.png" width="128">
+The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. There are 50000 training images and 10000 test images.
+
+```
+IMDSImage GetCifar10TrainData(int padding, float alpha)
+```
+```
+IMDSImage GetCifar10ValidData(int padding, float alpha)
+```
+```
+char* GetCifar10Class(int index)
+```
+
