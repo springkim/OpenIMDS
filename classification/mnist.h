@@ -172,7 +172,7 @@ static inline char* __DownloadMNIST(char* tmp_path, char* url_img, char* url_lbl
 		lbl_file_size = ftell(fp);
 		fclose(fp);
 	}
-	if (access(lbl_file, F_OK) != 0 || lbl_file_size!=lbl_file) {
+	if (access(lbl_file, F_OK) != 0 || lbl_file_size!=lbl_size) {
 		char cmd[MAX_PATH + 1] = { 0 };
 		sprintf(cmd, "wget -O %s \"%s\" >>/tmp/mnist.log 2>&1", lbl_file, url_lbl);
 		if (system(cmd) != 0) {
