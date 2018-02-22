@@ -24,6 +24,13 @@
 #include<linux/limits.h>
 #define MAX_PATH PATH_MAX
 #endif
+#ifndef _IMDSCPPDV	//IMDS c++ default value
+#ifdef __cplusplus
+#define _IMDSCPPDV(VALUE)	=(VALUE)		
+#else
+#define _IMDSCPPDV(VALUE)
+#endif
+#endif
 #if !defined(_IMDSImage)
 #define _IMDSImage
 typedef struct IMDSImage IMDSImage;
@@ -50,7 +57,7 @@ static inline void ReleaseIMDSImage(IMDSImage* imgs) {
 	imgs->n = imgs->w = imgs->h = imgs->c = 0;
 }
 #endif
-static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha) {
+static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha,bool bias) {
 	assert(image_file != NULL);
 	assert(padding >= 0);
 	FILE* fp = fopen(image_file, "rb");
@@ -68,7 +75,7 @@ static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha
 	for (int i = 0; i < 10000; i++) {
 		fread(row, 1, 3073, fp);
 		imgs.label[i] = (int)row[0];
-		imgs.image[i] = (float*)calloc((W + padding * 2)*(H + padding * 2)*3, sizeof(float));
+		imgs.image[i] = (float*)calloc((W + padding * 2)*(H + padding * 2)*3 + bias, sizeof(float));
 		for (int y = 0; y < H; y++) {
 			for (int x = 0; x < W; x++) {
 				imgs.image[i][(y + padding)*imgs.w * 3 + (x + padding) * 3 + 0] = row[y*W + x + 2 * W*H + 1] * alpha;
@@ -121,7 +128,7 @@ static inline char* __DownloadCifar10(char* tmp_path, char* url_img, char* name_
 #endif
 	return tmp_path;
 }
-static inline IMDSImage GetCifar10TrainData(int padding, float alpha) {
+static inline IMDSImage GetCifar10TrainData(int padding _IMDSCPPDV(0), float alpha _IMDSCPPDV(1.0F), bool bias _IMDSCPPDV(true)) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char name_img[MAX_PATH + 1] = { 0 };
 	IMDSImage train;
@@ -143,7 +150,7 @@ static inline IMDSImage GetCifar10TrainData(int padding, float alpha) {
 		__DownloadCifar10(tmp_path, url[i-1], name_img,30730000);
 		char path_img[MAX_PATH + 1] = { 0 };
 		strcat(strcpy(path_img, tmp_path), name_img);
-		IMDSImage temp= __ReadCIFAR10(path_img, padding, alpha);
+		IMDSImage temp= __ReadCIFAR10(path_img, padding, alpha,bias);
 		memcpy(train.image + (i - 1) * 10000, temp.image, temp.n * sizeof(float*));
 		memcpy(train.label + (i - 1) * 10000, temp.label, temp.n * sizeof(int));
 		free(temp.image);
@@ -151,14 +158,14 @@ static inline IMDSImage GetCifar10TrainData(int padding, float alpha) {
 	}
 	return train;
 }
-static inline IMDSImage GetCifar10ValidData(int padding, float alpha) {
+static inline IMDSImage GetCifar10ValidData(int padding _IMDSCPPDV(0), float alpha _IMDSCPPDV(1.0F), bool bias _IMDSCPPDV(true)) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char* name_img = "openimds_cifar10_test.bin";
 	char* url = "https://www.dropbox.com/s/uifxmb6hi0rmvr3/openimds_cifar10_test.bin?dl=1";
 	__DownloadCifar10(tmp_path, url,name_img,30730000);
 	char path_img[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(path_img, tmp_path), name_img);
-	return __ReadCIFAR10(path_img, padding, alpha);	
+	return __ReadCIFAR10(path_img, padding, alpha,bias);	
 }
 static inline char* GetCifar10Class(int index) {
 	switch (index) {

@@ -27,6 +27,13 @@
 #include<linux/limits.h>
 #define MAX_PATH PATH_MAX
 #endif
+#ifndef _IMDSCPPDV	//IMDS c++ default value
+#ifdef __cplusplus
+#define _IMDSCPPDV(VALUE)	=(VALUE)		
+#else
+#define _IMDSCPPDV(VALUE)
+#endif
+#endif
 #if !defined(_IMDSImage)
 #define _IMDSImage
 typedef struct IMDSImage IMDSImage;
@@ -64,7 +71,7 @@ static inline void __EndianChange(void *vp, size_t sz) {
 		end--;
 	}
 }
-static inline IMDSImage __ReadMNIST(char* image_file, char* label_file, int padding, float alpha) {
+static inline IMDSImage __ReadMNIST(char* image_file, char* label_file, int padding, float alpha,bool bias) {
 	assert(image_file != NULL);
 	assert(label_file != NULL);
 	assert(padding >= 0);
@@ -92,7 +99,7 @@ static inline IMDSImage __ReadMNIST(char* image_file, char* label_file, int padd
 	imgs.label = (int*)calloc(num_of_images, sizeof(int));
 	unsigned char* p = (unsigned char*)calloc(rows*cols, sizeof(unsigned char));
 	for (int n = 0; n < num_of_images; n++) {
-		imgs.image[n] = (float*)calloc((rows + padding * 2)*(cols + padding * 2), sizeof(float));
+		imgs.image[n] = (float*)calloc((rows + padding * 2)*(cols + padding * 2) + bias, sizeof(float));
 		unsigned char label;
 		fread(&label, sizeof(unsigned char), 1, fp_label);
 		imgs.label[n] = label;
@@ -183,7 +190,7 @@ static inline char* __DownloadMNIST(char* tmp_path, char* url_img, char* url_lbl
 #endif
 	return tmp_path;
 }
-static inline IMDSImage GetMnistTrainData(int padding, float alpha) {
+static inline IMDSImage GetMnistTrainData(int padding _IMDSCPPDV(0), float alpha _IMDSCPPDV(1.0F),bool bias _IMDSCPPDV(true)) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char* name_img = "openimds_mnist_train_image.bin";
 	char* name_lbl = "openimds_mnist_train_label.bin";
@@ -194,9 +201,9 @@ static inline IMDSImage GetMnistTrainData(int padding, float alpha) {
 	char path_lbl[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(path_img, tmp_path), name_img);
 	strcat(strcpy(path_lbl, tmp_path), name_lbl);
-	return __ReadMNIST(path_img, path_lbl, padding, alpha);
+	return __ReadMNIST(path_img, path_lbl, padding, alpha,bias);
 }
-static inline IMDSImage GetMnistValidData(int padding, float alpha) {
+static inline IMDSImage GetMnistValidData(int padding _IMDSCPPDV(0), float alpha _IMDSCPPDV(1.0F), bool bias _IMDSCPPDV(true)) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char* name_img = "openimds_mnist_valid_image.bin";
 	char* name_lbl = "openimds_mnist_valid_label.bin";
@@ -207,6 +214,6 @@ static inline IMDSImage GetMnistValidData(int padding, float alpha) {
 	char path_lbl[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(path_img, tmp_path), name_img);
 	strcat(strcpy(path_lbl, tmp_path), name_lbl);
-	return __ReadMNIST(path_img, path_lbl, padding, alpha);
+	return __ReadMNIST(path_img, path_lbl, padding, alpha,bias);
 }
 #endif  //MNIST_7E2_1_1C_MNIST_HPP_INCLUDED
