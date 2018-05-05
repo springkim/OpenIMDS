@@ -15,9 +15,14 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#ifndef __cplusplus
+#include<stdbool.h>
+#endif
 #if defined(_WIN32) || defined(_WIN64)
 #include<Windows.h>
+#include<direct.h>
 #include<Shlwapi.h>
+#include<ShlObj.h>
 #include<urlmon.h>
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib,"urlmon.lib")
@@ -29,7 +34,7 @@
 #endif
 #ifndef _IMDSCPPDV	//IMDS c++ default value
 #ifdef __cplusplus
-#define _IMDSCPPDV(VALUE)	=(VALUE)		
+#define _IMDSCPPDV(VALUE)	=(VALUE)
 #else
 #define _IMDSCPPDV(VALUE)
 #endif
@@ -117,7 +122,10 @@ static inline IMDSImage __ReadMNIST(char* image_file, char* label_file, int padd
 }
 static inline char* __DownloadMNIST(char* tmp_path, char* url_img, char* url_lbl, char* name_img, char* name_lbl,int img_size,int lbl_size) {
 #if defined(_WIN32) || defined(_WIN64)
-	int len = GetTempPathA(MAX_PATH, tmp_path);
+	SHGetFolderPathA(NULL, CSIDL_COMMON_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, tmp_path);
+	strcat(tmp_path,"\\OpenIMDS\\");
+	_mkdir(tmp_path);
+	size_t len=strlen(tmp_path);
 	assert(len != 0);
 	char img_file[MAX_PATH + 1] = { 0 };
 	char lbl_file[MAX_PATH + 1] = { 0 };

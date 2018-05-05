@@ -12,9 +12,14 @@
 #include<stdlib.h>
 #include<string.h>
 #include<assert.h>
+#ifndef __cplusplus
+#include<stdbool.h>
+#endif
 #if defined(_WIN32) || defined(_WIN64)
 #include<Windows.h>
+#include<direct.h>
 #include<Shlwapi.h>
+#include<ShlObj.h>
 #include<urlmon.h>
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib,"urlmon.lib")
@@ -88,7 +93,10 @@ static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha
 }
 static inline char* __DownloadCifar10(char* tmp_path, char* url_img, char* name_img,int file_size) {
 #if defined(_WIN32) || defined(_WIN64)
-	int len = GetTempPathA(MAX_PATH, tmp_path);
+	SHGetFolderPathA(NULL, CSIDL_COMMON_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, tmp_path);
+	strcat(tmp_path, "\\OpenIMDS\\");
+	_mkdir(tmp_path);
+	size_t len = strlen(tmp_path);
 	assert(len != 0);
 	char img_file[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(img_file, tmp_path), name_img);
