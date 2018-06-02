@@ -61,6 +61,21 @@ static inline void ReleaseIMDSImage(IMDSImage* imgs) {
 	}
 	imgs->n = imgs->w = imgs->h = imgs->c = 0;
 }
+IMDSImage GetRandomMiniBatch(IMDSImage imds, int batch_size) {
+	IMDSImage mini_batch;
+	mini_batch.w = imds.w;
+	mini_batch.h = imds.h;
+	mini_batch.c = imds.c;
+	mini_batch.n = batch_size;
+	mini_batch.image = (float**)malloc(batch_size*sizeof(float*));
+	mini_batch.label = (int*)malloc(batch_size*sizeof(int));
+	for (int i = 0; i<batch_size; i++) {
+		int idx = rand()%imds.n;
+		mini_batch.image[i] = imds.image[idx];
+		mini_batch.label[i] = imds.label[idx];
+	}
+	return mini_batch;
+}
 #endif
 static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha,bool bias) {
 	assert(image_file != NULL);
