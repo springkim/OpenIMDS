@@ -217,8 +217,8 @@ static inline IMDSImage GetMnistTrainData(int padding _IMDSCPPDV(0), float alpha
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char* name_img = "openimds_mnist_train_image.bin";
 	char* name_lbl = "openimds_mnist_train_label.bin";
-	__DownloadMNIST(tmp_path, "https://www.dropbox.com/s/f56cag59pk58lel/openimds_mnist_train_image.bin?dl=1"
-					, "https://www.dropbox.com/s/r1rgfhshebdhnms/openimds_mnist_train_label.bin?dl=1"
+	__DownloadMNIST(tmp_path, "https://github.com/springkim/OpenIMDS/releases/download/MNIST/openimds_mnist_train_image.bin"
+					, "https://github.com/springkim/OpenIMDS/releases/download/MNIST/openimds_mnist_train_label.bin"
 					, name_img, name_lbl, 47040016,60008);
 	char path_img[MAX_PATH + 1] = { 0 };
 	char path_lbl[MAX_PATH + 1] = { 0 };
@@ -230,13 +230,39 @@ static inline IMDSImage GetMnistValidData(int padding _IMDSCPPDV(0), float alpha
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char* name_img = "openimds_mnist_valid_image.bin";
 	char* name_lbl = "openimds_mnist_valid_label.bin";
-	__DownloadMNIST(tmp_path, "https://www.dropbox.com/s/zsf4wicmmru34s9/openimds_mnist_valid_image.bin?dl=1"
-					, "https://www.dropbox.com/s/wsj7xetwmwuhxj8/openimds_mnist_valid_label.bin?dl=1"
+	__DownloadMNIST(tmp_path, "https://github.com/springkim/OpenIMDS/releases/download/MNIST/openimds_mnist_valid_image.bin"
+					, "https://github.com/springkim/OpenIMDS/releases/download/MNIST/openimds_mnist_valid_label.bin"
 					, name_img, name_lbl,7840016,10008);
 	char path_img[MAX_PATH + 1] = { 0 };
 	char path_lbl[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(path_img, tmp_path), name_img);
 	strcat(strcpy(path_lbl, tmp_path), name_lbl);
 	return __ReadMNIST(path_img, path_lbl, padding, alpha,bias);
+}
+static inline IMDSImage GetFashionTrainData(int padding _IMDSCPPDV(0), float alpha _IMDSCPPDV(1.0F), bool bias _IMDSCPPDV(true)) {
+	char tmp_path[MAX_PATH + 1] = { 0 };
+	char* name_img = "openimds_fashion_train_image.bin";
+	char* name_lbl = "openimds_fashion_train_label.bin";
+	__DownloadMNIST(tmp_path, "https://github.com/springkim/OpenIMDS/releases/download/fashion/train-images-idx3-ubyte"
+					, "https://github.com/springkim/OpenIMDS/releases/download/fashion/train-labels-idx1-ubyte"
+					, name_img, name_lbl, 47040016, 60008);
+	char path_img[MAX_PATH + 1] = { 0 };
+	char path_lbl[MAX_PATH + 1] = { 0 };
+	strcat(strcpy(path_img, tmp_path), name_img);
+	strcat(strcpy(path_lbl, tmp_path), name_lbl);
+	return __ReadMNIST(path_img, path_lbl, padding, alpha, bias);
+}
+static inline IMDSImage GetFashionValidData(int padding _IMDSCPPDV(0), float alpha _IMDSCPPDV(1.0F), bool bias _IMDSCPPDV(true)) {
+	char tmp_path[MAX_PATH + 1] = { 0 };
+	char* name_img = "openimds_fashion_valid_image.bin";
+	char* name_lbl = "openimds_fashion_valid_label.bin";
+	__DownloadMNIST(tmp_path, "https://github.com/springkim/OpenIMDS/releases/download/fashion/t10k-images-idx3-ubyte"
+					, "https://github.com/springkim/OpenIMDS/releases/download/fashion/t10k-labels-idx1-ubyte"
+					, name_img, name_lbl, 7840016, 10008);
+	char path_img[MAX_PATH + 1] = { 0 };
+	char path_lbl[MAX_PATH + 1] = { 0 };
+	strcat(strcpy(path_img, tmp_path), name_img);
+	strcat(strcpy(path_lbl, tmp_path), name_lbl);
+	return __ReadMNIST(path_img, path_lbl, padding, alpha, bias);
 }
 #endif  //MNIST_7E2_1_1C_MNIST_HPP_INCLUDED

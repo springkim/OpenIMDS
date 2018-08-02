@@ -91,7 +91,7 @@ static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha
 	imgs.n = 10000;
 	imgs.label = (int*)calloc(imgs.n, sizeof(int));
 	imgs.image = (float**)calloc(imgs.n, sizeof(float*));
-	char row[3073];
+	unsigned char row[3073];
 	for (int i = 0; i < 10000; i++) {
 		fread(row, 1, 3073, fp);
 		imgs.label[i] = (int)row[0];
@@ -156,11 +156,11 @@ static inline IMDSImage GetCifar10TrainData(int padding _IMDSCPPDV(0), float alp
 	char name_img[MAX_PATH + 1] = { 0 };
 	IMDSImage train;
 	char* url[5] = {
-		"https://www.dropbox.com/s/1u0hpkbbddn3hc1/openimds_cifar10_train_1.bin?dl=1"
-		,"https://www.dropbox.com/s/mxk1zozw42cqk2a/openimds_cifar10_train_2.bin?dl=1"
-		,"https://www.dropbox.com/s/cxg81q891j78wa9/openimds_cifar10_train_3.bin?dl=1"
-		,"https://www.dropbox.com/s/tcnds6l7rba5tn7/openimds_cifar10_train_4.bin?dl=1"
-		,"https://www.dropbox.com/s/u9500s411uocjgg/openimds_cifar10_train_5.bin?dl=1"
+		"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_1.bin"
+		,"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_2.bin"
+		,"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_3.bin"
+		,"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_4.bin"
+		,"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_5.bin"
 	};
 	train.c = 3;
 	train.w = 32 + padding * 2;
@@ -184,7 +184,7 @@ static inline IMDSImage GetCifar10TrainData(int padding _IMDSCPPDV(0), float alp
 static inline IMDSImage GetCifar10ValidData(int padding _IMDSCPPDV(0), float alpha _IMDSCPPDV(1.0F), bool bias _IMDSCPPDV(true)) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char* name_img = "openimds_cifar10_test.bin";
-	char* url = "https://www.dropbox.com/s/uifxmb6hi0rmvr3/openimds_cifar10_test.bin?dl=1";
+	char* url = "https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_test.bin";
 	__DownloadCifar10(tmp_path, url,name_img,30730000);
 	char path_img[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(path_img, tmp_path), name_img);
