@@ -3,7 +3,7 @@
 *  OpenIMDS
 *
 *  Created by kimbomm on 2018. 1. 30...
-*  Copyright 2018 Sogang CVIP. All rights reserved.
+*  Copyright 2018 kimbomm. All rights reserved.
 *
 */
 #if !defined(OPENIMDS_7E2_1_1E_CIFAR10_H_INCLUDED)
@@ -104,6 +104,7 @@ static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, float alpha
 			}
 		}
 	}
+	fclose(fp);
 	return imgs;
 }
 static inline char* __DownloadCifar10(char* tmp_path, char* url_img, char* name_img,int file_size) {

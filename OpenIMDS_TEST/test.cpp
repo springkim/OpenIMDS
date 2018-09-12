@@ -1,5 +1,6 @@
 #include"../classification/mnist.h"
 #include"../classification/cifar10.h"
+#include"../classification/stl10.h"
 #include<opencv2/opencv.hpp>
 void CifarTest() {
 	IMDSImage train = GetCifar10TrainData();
@@ -23,7 +24,18 @@ void FashionTest() {
 		cv::waitKey();
 	}
 }
+void STL10Test() {
+	IMDSImage train = GetSTL10ValidData();
+	for (int i = 0; i<train.n; i++) {
+		cv::Mat img(train.h, train.w, CV_32FC3, train.image[i]);
+		img.convertTo(img, CV_8UC3);
+		cv::resize(img, img, cv::Size(500, 500));
+		cv::imshow("image", img);
+		std::cout << GetSTL10Class(train.label[i]) << std::endl;
+		cv::waitKey();
+	}
+}
 int main(){
-	FashionTest();
+	STL10Test();
 	return 0;
 }

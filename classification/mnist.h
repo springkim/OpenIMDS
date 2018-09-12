@@ -3,7 +3,7 @@
 *  OpenIMDS
 *
 *  Created by kimbomm on 2018. 01. 28...
-*  Copyright 2018 Sogang CVIP. All rights reserved.
+*  Copyright 2018 kimbomm. All rights reserved.
 *
 *	You can run directly on Visual Studio. But you need below option on MinGW64.
 *	-lshlwapi -lurlmon
