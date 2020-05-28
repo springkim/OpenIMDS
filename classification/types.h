@@ -47,6 +47,8 @@ struct IMDSImage {
 	int c;
 	int n;
 	float** image;
+	float* images;
+	int image_size;
 	int* label;
 	IMDSFormat format;
 	bool original;

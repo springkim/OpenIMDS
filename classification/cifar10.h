@@ -13,42 +13,34 @@
 #ifdef __cplusplus
 namespace {
 #endif
-	static inline IMDSImage __ReadCIFAR10(char* image_file, int padding, bool bias, IMDSFormat format) {
+	static inline void __ReadCIFAR10(IMDSImage* imgs,char* image_file, int padding, bool bias, IMDSFormat format,int idx) {
 		assert(image_file != NULL);
 		assert(padding >= 0);
 		FILE* fp = fopen(image_file, "rb");
 		assert(fp != NULL);
-		IMDSImage imgs;
 		const int W = 32;
 		const int H = 32;
-		imgs.w = W + padding * 2;
-		imgs.h = H + padding * 2;
-		imgs.c = 3;
-		imgs.n = 10000;
-		imgs.label = (int*)calloc(imgs.n, sizeof(int));
-		imgs.image = (float**)calloc(imgs.n, sizeof(float*));
-		imgs.format = format;
-		imgs.original = true;
 		unsigned char row[3073];
 		for (int i = 0; i < 10000; i++) {
+			int local = 10000 * idx + i;
 			fread(row, 1, 3073, fp);
-			imgs.label[i] = (int)row[0];
-			imgs.image[i] = (float*)calloc((W + padding * 2)*(H + padding * 2) * 3 + bias, sizeof(float));
+			imgs->label[local] = (int)row[0];
+			imgs->image[local] = imgs->images+(imgs->image_size * 10000 * idx + imgs->image_size*i);
 			for (int y = 0; y < H; y++) {
 				for (int x = 0; x < W; x++) {
 					for (int c = 0; c < 3; c++) {//current: RRGGBB
 						switch (format) {
 						case RRGGBB: {
-							imgs.image[i][(y + padding)*imgs.w + (x + padding) + c * imgs.w*imgs.h] = row[y*W + x + c * W*H + 1];
+							imgs->image[local][(y + padding)*imgs->w + (x + padding) + c * imgs->w*imgs->h] = row[y*W + x + c * W*H + 1];
 						}break;
 						case BBGGRR: {
-							imgs.image[i][(y + padding)*imgs.w + (x + padding) + c * imgs.w*imgs.h] = row[y*W + x + (2 - c) * W*H + 1];
+							imgs->image[local][(y + padding)*imgs->w + (x + padding) + c * imgs->w*imgs->h] = row[y*W + x + (2 - c) * W*H + 1];
 						}break;
 						case RGBRGB: {
-							imgs.image[i][(y + padding)*imgs.w * 3 + (x + padding) * 3 + c] = row[y*W + x + c * W*H + 1];
+							imgs->image[local][(y + padding)*imgs->w * 3 + (x + padding) * 3 + c] = row[y*W + x + c * W*H + 1];
 						}break;
 						case BGRBGR: {
-							imgs.image[i][(y + padding)*imgs.w * 3 + (x + padding) * 3 + c] = row[y*W + x + (2 - c) * W*H + 1];
+							imgs->image[local][(y + padding)*imgs->w * 3 + (x + padding) * 3 + c] = row[y*W + x + (2 - c) * W*H + 1];
 						}break;
 						}
 					}
@@ -56,7 +48,6 @@ namespace {
 			}
 		}
 		fclose(fp);
-		return imgs;
 	}
 	static inline char* __DownloadCifar10(char* tmp_path, char* url_img, char* name_img, int file_size) {
 #if defined(_WIN32) || defined(_WIN64)
@@ -109,7 +100,7 @@ namespace {
 static inline IMDSImage GetCifar10TrainData(int padding _IMDSCPPDV(0), bool bias _IMDSCPPDV(true), IMDSFormat format _IMDSCPPDV(RRGGBB)) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char name_img[MAX_PATH + 1] = { 0 };
-	IMDSImage train;
+	
 	char* url[5] = {
 		"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_1.bin"
 		,"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_2.bin"
@@ -117,33 +108,46 @@ static inline IMDSImage GetCifar10TrainData(int padding _IMDSCPPDV(0), bool bias
 		,"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_4.bin"
 		,"https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_train_5.bin"
 	};
-	train.c = 3;
-	train.w = 32 + padding * 2;
-	train.h = 32 + padding * 2;
-	train.n = 50000;
-	train.image = (float**)calloc(train.n, sizeof(float*));
-	train.label = (int*)calloc(train.n, sizeof(int));
+	IMDSImage imds;
+	imds.c = 3;
+	imds.w = 32 + padding * 2;
+	imds.h = 32 + padding * 2;
+	imds.n = 50000;
+	imds.image = (float**)calloc(imds.n, sizeof(float*));
+	imds.label = (int*)calloc(imds.n, sizeof(int));
+	imds.image_size = (imds.w + padding * 2)*(imds.h + padding * 2) * 3 + bias;
+	imds.images = (float*)calloc(imds.n*imds.image_size, sizeof(float));
+	imds.format = format;
+	imds.original = true;
 	for (int i = 1; i <= 5; i++) {
 		sprintf(name_img, "openimds_cifar10_train_%d.bin", i);
 		__DownloadCifar10(tmp_path, url[i - 1], name_img, 30730000);
 		char path_img[MAX_PATH + 1] = { 0 };
 		strcat(strcpy(path_img, tmp_path), name_img);
-		IMDSImage temp = __ReadCIFAR10(path_img, padding, bias, format);
-		memcpy(train.image + (i - 1) * 10000, temp.image, temp.n * sizeof(float*));
-		memcpy(train.label + (i - 1) * 10000, temp.label, temp.n * sizeof(int));
-		free(temp.image);
-		free(temp.label);
+		__ReadCIFAR10(&imds,path_img, padding, bias, format,i-1);
 	}
-	return train;
+	return imds;
 }
 static inline IMDSImage GetCifar10ValidData(int padding _IMDSCPPDV(0), bool bias _IMDSCPPDV(true), IMDSFormat format _IMDSCPPDV(RRGGBB)) {
 	char tmp_path[MAX_PATH + 1] = { 0 };
 	char* name_img = "openimds_cifar10_test.bin";
 	char* url = "https://github.com/springkim/OpenIMDS/releases/download/Cifar10/openimds_cifar10_test.bin";
+	IMDSImage imds;
+	imds.c = 3;
+	imds.w = 32 + padding * 2;
+	imds.h = 32 + padding * 2;
+	imds.n = 10000;
+	imds.image = (float**)calloc(imds.n, sizeof(float*));
+	imds.label = (int*)calloc(imds.n, sizeof(int));
+	imds.image_size = (imds.w + padding * 2)*(imds.h + padding * 2) * 3 + bias;
+	imds.images = (float*)calloc(imds.n*imds.image_size, sizeof(float));
+	imds.format = format;
+	imds.original = true;
 	__DownloadCifar10(tmp_path, url, name_img, 30730000);
 	char path_img[MAX_PATH + 1] = { 0 };
 	strcat(strcpy(path_img, tmp_path), name_img);
-	return __ReadCIFAR10(path_img, padding, bias, format);
+	__ReadCIFAR10(&imds,path_img, padding, bias, format,0);
+	return imds;
 }
 static inline char* GetCifar10Class(int index) {
 	switch (index) {
